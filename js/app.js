@@ -1,11 +1,10 @@
 (function() {
   'use strict';
 
-  let movies = [];
+  const movies = [];
 
   const renderMovies = function() {
     $('#listings').empty();
-    $('.material-tooltip').remove();
 
     for (const movie of movies) {
       const $col = $('<div>').addClass('col s6');
@@ -57,64 +56,30 @@
     }
   };
 
-  const getMovies = function(searchTerm) {
-    movies = [];
-
-    const $xhr = $.ajax({
-      method: 'GET',
-      url: `http://www.omdbapi.com/?s=${searchTerm}`,
-      dataType: 'json'
-    });
-
-    $xhr.done((data) => {
-      const results = data.Search;
-
-      for (const result of results) {
-        const movie = {
-          id: result.imdbID,
-          poster: result.Poster,
-          title: result.Title,
-          year: result.Year
-        };
-
-        getPlot(movie);
-      }
-    });
-
-    $xhr.fail((err) => {
-      console.error(err);
-    });
-  };
-
-  const getPlot = function(movie) {
-    const $xhr = $.ajax({
-      method: 'GET',
-      url: `http://www.omdbapi.com/?i=${movie.id}&plot=full`,
-      dataType: 'json'
-    });
-
-    $xhr.done((data) => {
-      movie.plot = data.Plot;
-
-      movies.push(movie);
-
-      renderMovies();
-    });
-
-    $xhr.fail((err) => {
-      console.error(err);
-    });
-  };
-
-  $('form').on('submit', (event) => {
-    event.preventDefault();
-
-    const searchTerm = $('#search').val();
-
-    if (searchTerm.trim() === '') {
-      return;
+  // ADD YOUR CODE HERE
+  $('button').click(function() {
+    if ($('#search').text()=== '' ) {
+      Materialize.toast("Please enter a movie title",5000);
     }
-
-    getMovies(searchTerm);
-  });
+    let searchMovie = $('#search').val();
+    $.ajax({
+      method:'GET',
+      url: `http://omdbapi.com/?s=${searchMovie}`,
+      dataType: 'json',
+      success: function(data) {
+        let list = $('#listings');
+        let ds = data.Search;
+        for (i=0; i<ds.length; i++) {
+          let title = ds.title;
+          let year = ds.year;
+          let poster = ds.poster;
+          let id= ds.imdbid;
+          list.append(`<div>${title}${poster}</div>`)
+        }
+      },
+      error: function() {
+        Materialize.toast("ERROR", 5000);
+      }
+    })
+  })
 })();
